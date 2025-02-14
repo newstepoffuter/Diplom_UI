@@ -6,13 +6,13 @@ from selenium.webdriver.chrome.options import Options
 from selene import browser
 from utils import attach
 
-DEFAULT_BROWSER_VERSION = "126.0"
+DEFAULT_BROWSER_VERSION = "100.0"
 
 
 def pytest_addoption(parser):
     parser.addoption(
         '--browser_version',
-        default='126.0'
+        default='100.0'
     )
 
 
