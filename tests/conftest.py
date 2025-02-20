@@ -36,17 +36,16 @@ def setup_browser(request):
         }
     }
     options.capabilities.update(selenoid_capabilities)
-
+    selenoid_host = os.getenv("SELENOID_HOST")
     login = os.getenv('LOGIN')
     password = os.getenv('PASSWORD')
 
     driver = webdriver.Remote(
-        command_executor=f"https://{login}:{password}@selenoid.autotests.cloud/wd/hub",
+        command_executor=f"https://{login}:{password}@{selenoid_host}/wd/hub",
         options=options
     )
-    browser.config.window_width = 1920
-    browser.config.window_height = 1080
     browser.config.driver = driver
+    browser.config.driver.maximize_window()
     yield browser
     attach.add_screenshot(browser)
     attach.add_logs(browser)
