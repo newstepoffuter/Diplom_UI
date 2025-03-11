@@ -23,7 +23,7 @@ def load_env():
 
 @pytest.fixture(scope='function', autouse=True)
 def setup_browser(request):
-    browser.config.base_url = 'https://www.gismeteo.ru/'
+    browser.config.base_url = 'https://www.gismeteo.ru'
     browser_version = request.config.getoption('--browser_version')
     browser_version = browser_version if browser_version != "" else DEFAULT_BROWSER_VERSION
     options = Options()
