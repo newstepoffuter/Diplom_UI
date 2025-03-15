@@ -1,16 +1,24 @@
 from selene import browser, have, be
 import allure
+from dotenv import load_dotenv
+import os
+
+# Загружаем переменные окружения
+load_dotenv()
 
 
 class GismeteoUiPage:
+    def __init__(self):
+        # Получаем BASE_URL из переменных окружения
+        self.base_url = os.getenv('BASE_URL')
+
     def open(self, path='/'):
         """
         Открывает сайт Gismeteo.
         :param path: Путь на сайте (по умолчанию открывает главную страницу).
         """
-        with allure.step('Открываем сайт Gismeteo'):
-            base_url = 'https://www.gismeteo.ru'
-            full_url = f"{base_url}{path}"
+        with allure.step(f'Открываем страницу: {path}'):
+            full_url = f"{self.base_url}{path}"
             browser.open(full_url)
 
     def search_and_select_city(self, city_name):
@@ -38,28 +46,50 @@ class GismeteoUiPage:
         with allure.step(f'Проверяем название города: {expected_city_name}'):
             browser.all('.breadcrumbs-link').second.should(have.text(expected_city_name))
 
-    def nav_buttons_is_visible(self):
+    def gismeteo_title_check_on_app_page(self):
         """
-        Проверяет видимость навигационных кнопок.
+        Проверяет заголовок страницы "Приложения".
         """
-        with allure.step('Проверяем видимость навигационных кнопок'):
-            browser.element(".header-nav").should(be.visible)
+        with allure.step('Проверяем заголовок страницы "Приложения"'):
+            browser.should(have.title('GISMETEO'))
 
-    def nav_buttons_is_clickable(self):
+    def open_moscow(self):
         """
-        Проверяет кликабельность навигационных кнопок.
+        Открывает страницу с погодой в Москве.
         """
-        with allure.step('Проверяем кликабельность навигационных кнопок'):
-            browser.element(".header-nav").should(be.clickable)
+        with allure.step('Открываем страницу с погодой в Москве'):
+            self.search_and_select_city('Москва')
 
-    def nav_text_is_visible(self, *button_texts):
+    def open_moscow_check(self):
         """
-        Проверяет наличие текста навигационных кнопок на сайте.
-        :param button_texts: Список текстов для проверки.
+        Проверяет, что открыта страница с погодой в Москве.
         """
-        with allure.step('Проверяем наличие текста навигационных кнопок на сайте'):
-            for text in button_texts:
-                browser.element(".header-nav").should(have.text(text))
+        with allure.step('Проверяем, что открыта страница с погодой в Москве'):
+            self.verify_city_name('Москва (город федерального значения)')
+
+    def today_weather_title_check(self):
+        """
+        Проверяет заголовок страницы с погодой на сегодня.
+        """
+        with allure.step('Проверяем заголовок страницы с погодой на сегодня'):
+            self.check_page_title('Погода в Москве сегодня')
+
+    def three_days_weather_title_check(self):
+        """
+        Проверяет заголовок страницы с погодой на 3 дня.
+        """
+        with allure.step('Проверяем заголовок страницы с погодой на 3 дня'):
+            browser.element('[data-stat-value="3-days"]').click()
+            self.check_page_title('Погода в Москве на 3 дня')
+
+    def radar_title_check(self):
+        """
+        Проверяет заголовок страницы с радаром.
+        """
+        with allure.step('Проверяем заголовок страницы с радаром'):
+            browser.element('[href="/nowcast-moscow-4368/"]').click()
+            self.check_page_title('Радар осадков и гроз в Москве')
 
 
-gismeteo_ui_action = GismeteoUiPage()
+# Создаем экземпляр класса для использования в тестах
+gismeteo_ui_page = GismeteoUiPage()
