@@ -53,12 +53,21 @@ class GismeteoUiPage:
             browser.element('.page-title').should(have.text(expected_title))
 
     def verify_city_name(self, expected_city_name):
-        """
-        Проверяет название города на странице.
-        :param expected_city_name: Ожидаемое название города.
-        """
-        with allure.step(f'Проверяем название города: {expected_city_name}'):
-            browser.all('.breadcrumbs-link').second.should(have.text(expected_city_name))
+            """
+            Проверяет название города на странице.
+            :param expected_city_name: Ожидаемое название города.
+            """
+            with allure.step(f'Проверяем название города: {expected_city_name}'):
+                try:
+                    browser.all('.breadcrumbs-link').with_(timeout=10).should(have.size_greater_than_or_equal(2))
+                    browser.all('.breadcrumbs-link').second.should(have.text(expected_city_name))
+                except Exception as e:
+                    allure.attach(
+                        browser.driver.get_screenshot_as_png(),
+                        name="verify_city_name_failed",
+                        attachment_type=allure.attachment_type.PNG
+                    )
+                    raise e
 
     def gismeteo_title_check_on_app_page(self):
         """
