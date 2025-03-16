@@ -9,7 +9,6 @@ load_dotenv()
 
 class GismeteoUiPage:
     def __init__(self):
-        # Получаем BASE_URL из переменных окружения
         self.base_url = os.getenv('BASE_URL')
 
     def open(self, path='/'):
@@ -27,8 +26,11 @@ class GismeteoUiPage:
         :param city_name: Название города.
         """
         with allure.step(f'Ищем и выбираем город: {city_name}'):
-            browser.element('[placeholder="Поиск местоположения"]').type(city_name)
-            browser.element(f'[href*="/weather-{city_name.lower()}"]').click()
+            browser.element('[class="search-form "]').should(be.clickable).click()
+            search_input = browser.element('[placeholder="Поиск местоположения"]')
+            search_input.should(be.visible).type(city_name)
+            city_link = browser.element(f'[href*="/weather-{city_name.lower()}"]')
+            city_link.should(be.visible).click()
 
     def check_page_title(self, expected_title):
         """
