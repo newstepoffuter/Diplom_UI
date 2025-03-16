@@ -7,6 +7,10 @@ import os
 load_dotenv()
 
 
+class TimeoutException:
+    pass
+
+
 class GismeteoUiPage:
     def __init__(self):
         self.base_url = os.getenv('BASE_URL')
@@ -20,17 +24,30 @@ class GismeteoUiPage:
             full_url = f"{self.base_url}{path}"
             browser.open(full_url)
 
-    def search_and_select_city(self, city_name):
-        """
-        Ищет и выбирает город.
-        :param city_name: Название города.
-        """
-        with allure.step(f'Ищем и выбираем город: {city_name}'):
-            browser.element('[class="search-form "]').should(be.clickable).click()
-            search_input = browser.element('[placeholder="Поиск местоположения"]')
-            search_input.should(be.visible).type(city_name)
-            city_link = browser.element(f'[href*="/weather-{city_name.lower()}"]')
-            city_link.should(be.visible).click()
+    from selene import browser, have, be
+    import allure
+    from selene.core.exceptions import TimeoutException
+
+    class GismeteoUiPage:
+        def search_and_select_city(self, city_name):
+            """
+            Ищет и выбирает город.
+            :param city_name: Название города.
+            """
+            with allure.step(f'Ищем и выбираем город: {city_name}'):
+                try:
+                    browser.element('[class="search-form "]').with_(timeout=10).should(be.visible).click()
+                    search_input = browser.element('[placeholder="Поиск местоположения"]')
+                    search_input.should(be.visible).type(city_name)
+                    city_link = browser.element(f'[href*="/weather-{city_name.lower()}"]')
+                    city_link.should(be.visible).click()
+                except TimeoutException:
+                    allure.attach(
+                        browser.driver.get_screenshot_as_png(),
+                        name=f"search_and_select_city_failed_{city_name}",
+                        attachment_type=allure.attachment_type.PNG
+                    )
+                    raise AssertionError(f"Элемент поиска или город '{city_name}' не найдены")
 
     def check_page_title(self, expected_title):
         """
@@ -93,5 +110,4 @@ class GismeteoUiPage:
             self.check_page_title('Радар осадков и гроз в Москве')
 
 
-# Создаем экземпляр класса для использования в тестах
 gismeteo_ui_page = GismeteoUiPage()
