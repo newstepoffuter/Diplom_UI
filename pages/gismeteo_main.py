@@ -12,12 +12,16 @@ class TimeoutException:
 
 class GismeteoUiPage:
     def __init__(self):
-        self.base_url = os.getenv('BASE_URL', 'https://www.gismeteo.ru')
+        self.base_url = os.getenv('BASE_URL')
 
     def open(self, path='/'):
-        full_url = f"{self.base_url}{path}"
-        print(f"Opening URL: {full_url}")
-        browser.open(full_url)
+        """
+        Открывает сайт Gismeteo.
+        :param path: Путь на сайте (по умолчанию открывает главную страницу).
+        """
+        with allure.step(f'Открываем страницу: {path}'):
+            full_url = f"{self.base_url}{path}"
+            browser.open(full_url)
 
     class GismeteoUiPage:
         def search_and_select_city(self, city_name):
